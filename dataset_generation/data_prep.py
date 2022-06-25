@@ -11,6 +11,8 @@ from matplotlib.patches import Circle
 import numpy as np
 import ipdb
 from time import sleep
+
+# import the Maurice library from Pybind
 from Maurice import *
 
 
@@ -21,6 +23,8 @@ all_segment = []
 flag_move = False
 drag_status = False
 
+
+# input shape
 img = mpimg.imread('maurice.png')
 fig = plt.figure()
 ax= fig.add_subplot(111)
@@ -29,6 +33,7 @@ ax.set_xlim(0, 300)
 ax.set_ylim(0, 300)
 ax.imshow(img, extent=(0, 250, 50, 300))
 plt.axis('off')
+
 
 # Create axes for frequency and amplitude sliders
 slider = plt.axes([0.20, 0.95, 0.65, 0.03])
@@ -51,12 +56,12 @@ def Clear():
     print("Clear the Handle Action")
 
 
+# fix the shape/image dimension
 def reset_view():
     global fig 
     global ax
     
     ax = fig.add_subplot(111)
-
 
     #ax = plt.gca()
     ax.set_xlim(0, 300)
@@ -64,10 +69,13 @@ def reset_view():
     ax.imshow(img, extent=(0, 250, 50, 300))
     
 
+# Event triggered by mouse click event
 def onclick(event):
     global all_segment
     if len(all_segment):
         print('onclick $$$$$$$$$$$$$$$$$$$$$$', len(all_segment[0]))
+
+    # check that onclick not trigger while moving the handle
     global flag_move
     print(flag_move)
     if not flag_move:
@@ -75,8 +83,11 @@ def onclick(event):
         global ix, iy
         
         ix, iy = event.xdata, event.ydata
+
+        # setting the button bound
         bounds_btn = (0.12, 0.73, 0.15, 0.23)
 
+        # onclick event activate by clicking on the button
         if ix is not None and iy is not None and (ix < 0.12 or ix > 0.73) and (iy >0.23):
             print('calling on click @@@@@@@@@', event.inaxes)
             print('x = %d, y = %d'%(ix, iy))
@@ -94,6 +105,7 @@ def onclick(event):
                 if len(coords):
                     all_segment.append(coords_array)
             #print(coords_array.shape)
+            # plotting all the segments handles
             for segment in all_segment:
                 try:
                     ax.plot(segment[:,0], segment[:,1], markersize=10)
@@ -104,6 +116,7 @@ def onclick(event):
             plt.draw()
 
 
+# draw new handles
 def nHandle(event):
     
     global coords
@@ -111,6 +124,7 @@ def nHandle(event):
     # coords.append([ix, iy])
     print('nHandle $$$$$$$$$$$$$$$$$$$$$$', len(all_segment[0]))
     global ax
+    # setting botton bound for nHandle
     button_bounds = [[0.12, 1e-06], [0.27, 0.075001]]
     ix, iy = event.xdata, event.ydata
     print('nHandle called')
@@ -120,6 +134,7 @@ def nHandle(event):
     position_of_axis = event.inaxes.get_position().extents
     
     # ipdb.set_trace()
+    # check the setting of the nHandle button bound
     if (ix is not None and iy is not None) and ((button_bounds[0][0] == position_of_axis[0]) and (button_bounds[1][0] == position_of_axis[2] and button_bounds[1][1]== position_of_axis[3])):
         # ipdb.set_trace()
         print('going in nHandle called')
@@ -128,6 +143,8 @@ def nHandle(event):
         coords = []
 
 
+# Finding the closest point of the handle 
+# which has minimum distance from the clicked point
 def find_closest_pt(x,y):
     global all_segment
     min_seg_index = None
@@ -163,7 +180,7 @@ def nFrame(img):
     print('generating new frame')
     return img
 
-
+# Activate the Move mode
 def ActivateMove(event):
     
     global current_segment
@@ -171,11 +188,13 @@ def ActivateMove(event):
     global flag_move
     print('ActivateMove $$$$$$$$$$$$$$$$$$$$$$', len(all_segment[0]))
 
+    # setting the move button bound
     button_bounds = [[0.52, 0.000001], [6.7000e-01, 7.5001e-02]]
     ix, iy = event.xdata, event.ydata
     
     position_of_axis = event.inaxes.get_position().extents
     
+    # check the setting of the Move button bound
     if (ix is not None and iy is not None) and ((button_bounds[0][0] == position_of_axis[0]) and (button_bounds[1][0] == position_of_axis[2] and button_bounds[1][1] == position_of_axis[3])):
         print('Move the Handles @@@@@@@', position_of_axis)
         
@@ -185,6 +204,7 @@ def ActivateMove(event):
     print(flag_move)
 
 
+# Setting the set of closest point of handle by click event 
 def findSetClosestOnClick(event):
         global flag_move
         print(flag_move)
@@ -201,7 +221,7 @@ def findSetClosestOnClick(event):
             print(g_seg_index)
             print(g_pt_index)
 
-
+# update the handle points while dragging the mouse
 def drag_update(event):
     global flag_move
     global g_seg_index
@@ -239,8 +259,9 @@ def drag_update(event):
                 exit()
         # ax.clear()
         # ax.imshow(img, extent=(0, 250, 50, 300))
-        
-        
+ 
+
+# deactive the move handle mode           
 def deactivate_move(event):
     global drag_status
     global flag_move 
@@ -255,14 +276,16 @@ def deactivate_move(event):
         print('######## resetting')
         sleep(0.2)
         
-
+# Remove all the handle from the canvas
 def Clear(event):
     print('Clear all Handles')
     global all_segment
     global coords
+    # setting the clear button bound
     button_bounds = [[7.2000e-01, 1.0000e-06], [8.7000e-01, 7.5001e-02]]
     position_of_axis = event.inaxes.get_position().extents
     print(position_of_axis)
+    # check the setting of the Clear button bound
     if (ix is not None and iy is not None) and ((button_bounds[0][0] == position_of_axis[0]) and (button_bounds[1][0] == position_of_axis[2] and button_bounds[1][1] == position_of_axis[3])):
         coords = []
         all_segment = []
@@ -280,6 +303,7 @@ cid = fig.canvas.mpl_connect('motion_notify_event', drag_update)
 cid = fig.canvas.mpl_connect('button_release_event', deactivate_move)
   
 
+# define PyMaurice function to call the useful functionality of Maurice library
 def PyMaurice(event):
     Maurice.initShape("maurice.png")
     
@@ -291,21 +315,31 @@ cid = fig.canvas.mpl_connect('button_press_event', nHandle)
 cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
 
+# Creating the buttons
+
+# For creating multiple line handle
+# nHandle
 Button1 = plt.axes([0.12, 0.000001, 0.15, 0.075])
 bnext = Button(Button1, 'nHandle',color="lightgreen")
 bnext.on_clicked(nHandle)
 
+# Saving the information of the deformation points and initial point
+# Save
 Button2 = plt.axes([0.32, 0.000001, 0.15, 0.075])
 bnext = Button(Button2, 'Save',color="lightpink")
 bnext.on_clicked(Save)
 
+# Move the line Handles
+# ActivateMove
 Button3 = plt.axes([0.52, 0.000001, 0.15, 0.075])
 bnext = Button(Button3, 'Move',color="grey")
 bnext.on_clicked(ActivateMove)
 
+# Clear all the handle from the canvas (shape/image)
+# Clear
 Button4 = plt.axes([0.72, 0.000001, 0.15, 0.075])
 bnext = Button(Button4, 'Clear',color="skyblue")
-# bnext.on_clicked(Clear)
+bnext.on_clicked(Clear)
 
 
 # Create fuction to be called when slider value is changed
