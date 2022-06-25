@@ -315,6 +315,7 @@ def update(val):
 # Call update function when slider value is changed
 frame.on_changed(update)
 
+
 # display graph
 plt.show()
 plt.draw()
