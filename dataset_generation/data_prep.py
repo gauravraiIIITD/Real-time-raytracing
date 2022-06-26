@@ -14,7 +14,7 @@ from time import sleep
 
 # import the Maurice library from Pybind
 from Maurice import *
-
+import Maurice
 
 coordinates = []
 coords = []
@@ -44,6 +44,36 @@ slider = plt.axes([0.20, 0.95, 0.65, 0.03])
 frame = Slider(slider, 'Slider', 0.0, 100.0, 0)
 g_seg_index = None
 g_pt_index = None
+
+
+
+Handle_orignal = []
+Handle_modified = []
+Handle_Map = []
+ShapeFromImage = []
+CageFromImage = []
+TriangulationVerticesFromImage = []
+
+Maurice.initShape("maurice.png")
+ShapeFromImage = Maurice.getShapeFromImage("maurice.png")
+CageFromImage = Maurice.getCageFromImage("maurice.png")
+TriangulationVerticesFromImage = Maurice.getTriangulationVerticesFromImage("maurice.png") 
+Handle_orignal = Maurice.getHandleCoordinatesOriginal()
+Handle_modified = Maurice.getHandleCoordinatesModified()
+Handle_Map = Maurice.getHandleMapFromImage("maurice.png")
+
+print("ShapeFromImage", ShapeFromImage)
+print("\n")
+print("CageFromImage", CageFromImage)
+print("\n")
+print("TriangulationVerticesFromImage", TriangulationVerticesFromImage)
+print("\n")
+# print("Handle_orignal", Handle_orignal)
+# print("\n")
+# print("Handle_modified", Handle_modified)
+# print("\n")
+# print("Handle_Map", Handle_Map)
+# print("\n")
 
 
 def nFrame():
@@ -140,7 +170,23 @@ def nHandle(event):
         print('going in nHandle called')
         # print('call nSegment @@@@@@@@@@', ix, iy)
         all_segment.append(np.array(coords))
+        # Maurice.init_addLineHandle(all_segment)
         coords = []
+
+
+# def Save(event):
+#     global coords
+#     global all_segment
+#     global ax
+#     bounds_range = [[0.43, 0.97],[0.97, 0.91]]
+#     ix, iy = event.xdata, event.ydata
+#     print('Save called')
+#     position_of_axis = event.inaxes.get_position().extents
+#     if (ix is not None and iy is not None) and ((button_bounds[0][0] == position_of_axis[0]) and (button_bounds[1][0] == position_of_axis[2] and button_bounds[1][1]== position_of_axis[3])):
+#         for segments in all_segment:
+#             print('all segment data', segments[g_seg_index])
+#             print('each segment data', segments[g_pt_index])
+
 
 
 # Finding the closest point of the handle 
@@ -179,6 +225,7 @@ def find_closest_pt(x,y):
 def nFrame(img):
     print('generating new frame')
     return img
+
 
 # Activate the Move mode
 def ActivateMove(event):
@@ -220,6 +267,7 @@ def findSetClosestOnClick(event):
             print('closest indices.....', min_x, min_y, min_dist, g_seg_index, g_pt_index)
             print(g_seg_index)
             print(g_pt_index)
+
 
 # update the handle points while dragging the mouse
 def drag_update(event):
@@ -275,7 +323,8 @@ def deactivate_move(event):
         g_pt_index = None
         print('######## resetting')
         sleep(0.2)
-        
+   
+
 # Remove all the handle from the canvas
 def Clear(event):
     print('Clear all Handles')
@@ -304,8 +353,10 @@ cid = fig.canvas.mpl_connect('button_release_event', deactivate_move)
   
 
 # define PyMaurice function to call the useful functionality of Maurice library
-def PyMaurice(event):
-    Maurice.initShape("maurice.png")
+# def PyMaurice(event):
+#     Maurice.initShape("maurice.png")
+#     Maurice.init_addLineHandle(all_segment)
+#     Maurice.init_deform(g_seg_index, g_pt_index)
     
 
 
@@ -313,6 +364,7 @@ cid = fig.canvas.mpl_connect('button_press_event', ActivateMove)
 cid = fig.canvas.mpl_connect('button_press_event', Clear)
 cid = fig.canvas.mpl_connect('button_press_event', nHandle)
 cid = fig.canvas.mpl_connect('button_press_event', onclick)
+cid = fig.canvas.mpl_connect('button_press_event', Save)
 
 
 # Creating the buttons
@@ -353,3 +405,6 @@ frame.on_changed(update)
 # display graph
 plt.show()
 plt.draw()
+
+
+
